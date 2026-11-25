@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+
+{% block title %}Smart Matches – Python Weighted Matching Engine{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: 40px 0; max-width: 1000px;">
+    <!-- Page Header -->
+    <div style="margin-bottom: 28px;">
+        <div class="hero-pill" style="margin-bottom: 12px;">
+            <i data-lucide="cpu" style="width: 14px; height: 14px;"></i>
+            <span>Python-Powered Algorithmic Similarity Engine</span>
+        </div>
+        <h1 style="font-size: 2.2rem; color: var(--primary-navy); margin-bottom: 8px;">
+            Smart Match Synthesizer
+        </h1>
+        <p style="font-size: 15px; color: var(--text-secondary); max-width: 800px;">
+            Our Python algorithm compares lost and found reports within <strong>{{ current_institution.name }}</strong> across 5 weighted vectors: 
+            <strong>Name & Keywords (30%)</strong>, <strong>Category (20%)</strong>, <strong>Description (25%)</strong>, <strong>Location (15%)</strong>, and <strong>Date Proximity (10%)</strong>.
+        </p>
+    </div>
+
+    <!-- Algorithm Factor Legend Bar -->
+    <div class="card" style="padding: 16px 24px; margin-bottom: 30px; background: #fff; border-left: 4px solid var(--royal-blue);">
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; font-size: 13px;">
+            <div style="font-weight: 700; color: var(--primary-navy); display: flex; align-items: center; gap: 6px;">
+                <i data-lucide="scale" style="width: 16px; height: 16px; color: var(--royal-blue);"></i>
+                <span>Weighted Formula:</span>
+            </div>
+            <div style="display: flex; gap: 16px; flex-wrap: wrap; color: var(--text-secondary);">
+                <span>Title/Keywords: <strong>30%</strong></span>
+                <span>Category: <strong>20%</strong></span>
+                <span>Description: <strong>25%</strong></span>
+                <span>Location: <strong>15%</strong></span>
+                <span>Date: <strong>10%</strong></span>
+            </div>
+            <div style="font-size: 11.5px; color: var(--text-muted);">Total = 100%</div>
+        </div>
+    </div>
+
+    <!-- Match Confidence Level Explainer Alert -->
+    <div style="background: var(--accent-light); border: 1px solid var(--accent-border); border-radius: var(--radius-md); padding: 14px 18px; margin-bottom: 30px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+        <div style="display: flex; align-items: center; gap: 10px; font-size: 13.5px; color: var(--primary-navy);">
+            <i data-lucide="info" style="width: 18px; height: 18px; color: var(--royal-blue);"></i>
+            <span>
+                Matches are ranked strictly from highest to lowest score. Scores are suggestions, not proof of ownership.
+            </span>
+        </div>
+        <div style="display: flex; gap: 8px;">
+            <span class="match-score-badge match-strong" style="font-size: 11px;">80-100%: Strong</span>
+            <span class="match-score-badge match-potential" style="font-size: 11px;">60-79%: Potential</span>
+            <span class="match-score-badge match-low" style="font-size: 11px;">Below 60%: Low</span>
+        </div>
+    </div>
+
+    <!-- Matches List -->
+    {% if matches %}
+        <div style="display: flex; flex-direction: column; gap: 24px;">
+            {% for m in matches %}
+                <div class="match-card">
+                    <!-- Match Header -->
+                    <div class="match-header">
+                        <div style="display: flex; align-items: center; gap: 14px;">
+                            <div class="score-circle" style="width: 58px; height: 58px; font-size: 17px;">
+                                {{ m.score|round(1) }}%
+                                <span>Score</span>
+                            </div>
+                            <div>
+                                <span class="match-score-badge {{ m.badge_class }}">
+                                    <i data-lucide="check" style="width: 14px; height: 14px;"></i>
+                                    {{ m.label }}
+                                </span>
+                                <div style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">
+                                    Calculated for {{ current_institution.code }} • Pair #{{ m.lost_item.id }}-{{ m.found_item.id }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; gap: 10px;">
+                            {% if m.found_item.status not in ('recovered', 'closed') %}
+                                <a href="{{ url_for('claim_item_page', item_id=m.found_item.id) }}" class="btn btn-primary btn-sm">
+                                    <i data-lucide="shield-check" style="width: 14px; height: 14px;"></i> Submit Claim
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Side-by-Side Comparison Grid -->
+                    <div class="match-comparison">
+                        <!-- Lost Item Card -->
+                        <div class="match-side">
+                            <div class="match-side-tag" style="color: #991B1B;">
+                                <i data-lucide="search" style="width: 12px; height: 12px; display: inline-block;"></i> Lost Item Report
+                            </div>
+                            <h4 style="font-size: 1.15rem; color: var(--primary-navy); margin-bottom: 6px;">
+                                {{ m.lost_item.name }}
+                            </h4>
+                            <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 12px; line-height: 1.5;">
+                                {{ m.lost_item.description }}
+                            </div>
+                            <div style="font-size: 12.5px; color: var(--text-muted); display: flex; flex-direction: column; gap: 4px;">
+                                <div><strong>Category:</strong> {{ m.lost_item.category }}</div>
+                                <div><strong>Location:</strong> {{ m.lost_item.location }}</div>
+                                <div><strong>Date Lost:</strong> {{ m.lost_item.date_event }}</div>
+                            </div>
+                            <a href="{{ url_for('item_details', item_id=m.lost_item.id) }}" class="btn btn-outline btn-sm" style="margin-top: 12px; width: 100%;">
+                                View Lost Report
+                            </a>
+                        </div>
+
+                        <!-- Found Item Card -->
+                        <div class="match-side">
+                            <div class="match-side-tag" style="color: #166534;">
+                                <i data-lucide="package-check" style="width: 12px; height: 12px; display: inline-block;"></i> Found Item Report
+                            </div>
+                            <h4 style="font-size: 1.15rem; color: var(--primary-navy); margin-bottom: 6px;">
+                                {{ m.found_item.name }}
+                            </h4>
+                            <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 12px; line-height: 1.5;">
+                                {{ m.found_item.description }}
+                            </div>
+                            <div style="font-size: 12.5px; color: var(--text-muted); display: flex; flex-direction: column; gap: 4px;">
+                                <div><strong>Category:</strong> {{ m.found_item.category }}</div>
+                                <div><strong>Location:</strong> {{ m.found_item.location }}</div>
+                                <div><strong>Date Found:</strong> {{ m.found_item.date_event }}</div>
+                            </div>
+                            <a href="{{ url_for('item_details', item_id=m.found_item.id) }}" class="btn btn-outline btn-sm" style="margin-top: 12px; width: 100%;">
+                                View Found Report
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- 5-Factor Similarity Breakdown -->
+                    <div class="factors-breakdown">
+                        <div style="font-size: 12.5px; font-weight: 700; color: var(--primary-navy); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.05em;">
+                            Mathematical Factor Contribution Breakdown:
+                        </div>
+
+                        <!-- Name 30% -->
+                        <div class="factor-row">
+                            <span style="width: 180px;">Item Title & Keywords (30%)</span>
+                            <div class="factor-bar-bg" style="flex: 1;">
+                                <div class="factor-bar-fill" style="width: {{ m.factors.name.score }}%;"></div>
+                            </div>
+                            <span style="font-weight: 600; width: 85px; text-align: right;">
+                                {{ m.factors.name.score }}% ({{ m.factors.name.contribution }}/30 pts)
+                            </span>
+                        </div>
+
+                        <!-- Category 20% -->
+                        <div class="factor-row">
+                            <span style="width: 180px;">Category Alignment (20%)</span>
+                            <div class="factor-bar-bg" style="flex: 1;">
+                                <div class="factor-bar-fill" style="width: {{ m.factors.category.score }}%; background: #3B82F6;"></div>
+                            </div>
+                            <span style="font-weight: 600; width: 85px; text-align: right;">
+                                {{ m.factors.category.score }}% ({{ m.factors.category.contribution }}/20 pts)
+                            </span>
+                        </div>
+
+                        <!-- Description 25% -->
+                        <div class="factor-row">
+                            <span style="width: 180px;">Description Similarity (25%)</span>
+                            <div class="factor-bar-bg" style="flex: 1;">
+                                <div class="factor-bar-fill" style="width: {{ m.factors.description.score }}%; background: #6366F1;"></div>
+                            </div>
+                            <span style="font-weight: 600; width: 85px; text-align: right;">
+                                {{ m.factors.description.score }}% ({{ m.factors.description.contribution }}/25 pts)
+                            </span>
+                        </div>
+
+                        <!-- Location 15% -->
+                        <div class="factor-row">
+                            <span style="width: 180px;">Location Proximity (15%)</span>
+                            <div class="factor-bar-bg" style="flex: 1;">
+                                <div class="factor-bar-fill" style="width: {{ m.factors.location.score }}%; background: #0EA5E9;"></div>
+                            </div>
+                            <span style="font-weight: 600; width: 85px; text-align: right;">
+                                {{ m.factors.location.score }}% ({{ m.factors.location.contribution }}/15 pts)
+                            </span>
+                        </div>
+
+                        <!-- Date 10% -->
+                        <div class="factor-row">
+                            <span style="width: 180px;">Date Proximity (10%)</span>
+                            <div class="factor-bar-bg" style="flex: 1;">
+                                <div class="factor-bar-fill" style="width: {{ m.factors.date.score }}%; background: #10B981;"></div>
+                            </div>
+                            <span style="font-weight: 600; width: 85px; text-align: right;">
+                                {{ m.factors.date.score }}% ({{ m.factors.date.contribution }}/10 pts)
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="card" style="text-align: center; padding: 60px 20px;">
+            <div style="width: 56px; height: 56px; border-radius: 50%; background: var(--accent-light); color: var(--royal-blue); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
+                <i data-lucide="sparkles" style="width: 28px; height: 28px;"></i>
+            </div>
+            <h3 style="margin-bottom: 8px;">No Current Matches Above Threshold</h3>
+            <p style="max-width: 480px; margin: 0 auto 20px;">
+                The matching engine evaluated active lost and found reports in your institution, but no pairs met the minimum similarity threshold.
+            </p>
+            <div style="display: flex; justify-content: center; gap: 10px;">
+                <a href="{{ url_for('report_lost') }}" class="btn btn-primary btn-sm">Report Lost Item</a>
+                <a href="{{ url_for('browse_items') }}" class="btn btn-outline btn-sm">Browse Items</a>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

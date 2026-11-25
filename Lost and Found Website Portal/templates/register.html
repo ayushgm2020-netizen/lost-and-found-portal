@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}Create Account – SmartRecover{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: 50px 0; max-width: 540px;">
+    <div class="card" style="padding: 36px;">
+        <div style="text-align: center; margin-bottom: 28px;">
+            <div class="brand-icon" style="width: 44px; height: 44px; margin: 0 auto 14px;">
+                <i data-lucide="user-plus" style="width: 24px; height: 24px;"></i>
+            </div>
+            <h2 style="font-size: 1.75rem; margin-bottom: 6px;">Create an Account</h2>
+            <p style="font-size: 14px;">Register with your educational institution to report and track items.</p>
+        </div>
+
+        <form action="{{ url_for('register') }}" method="POST">
+            <input type="hidden" name="csrf_token" value="{{ session.get('csrf_token') }}">
+            
+            <div class="form-group">
+                <label class="form-label" for="full_name">Full Name <span class="required">*</span></label>
+                <input type="text" id="full_name" name="full_name" class="form-control" placeholder="e.g. Ayush Sharma" required value="{{ request.form.get('full_name', '') }}">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="email">Campus Email Address <span class="required">*</span></label>
+                <input type="email" id="email" name="email" class="form-control" placeholder="e.g. ayush@aiet.edu" required value="{{ request.form.get('email', '') }}">
+                <div class="form-hint">Used for sign-in and match/claim notifications.</div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="institution_id">Select Institution <span class="required">*</span></label>
+                <select id="institution_id" name="institution_id" class="form-control" required>
+                    <option value="" disabled {% if not request.form.get('institution_id') %}selected{% endif %}>-- Choose your college or university --</option>
+                    {% for inst in institutions %}
+                        <option value="{{ inst.id }}" {% if request.form.get('institution_id') == inst.id|string %}selected{% endif %}>
+                            {{ inst.name }} ({{ inst.code }})
+                        </option>
+                    {% endfor %}
+                </select>
+                <div class="form-hint">Items and smart matches are restricted strictly to your selected institution.</div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="contact_number">Contact Number (Optional)</label>
+                <input type="tel" id="contact_number" name="contact_number" class="form-control" placeholder="+91 9876543210" value="{{ request.form.get('contact_number', '') }}">
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label" for="password">Password <span class="required">*</span></label>
+                    <input type="password" id="password" name="password" class="form-control" placeholder="••••••••" required minlength="6">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="confirm_password">Confirm Password <span class="required">*</span></label>
+                    <input type="password" id="confirm_password" name="confirm_password" class="form-control" placeholder="••••••••" required minlength="6">
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-lg" style="width: 100%; margin-top: 10px;">
+                <i data-lucide="check" style="width: 18px; height: 18px;"></i>
+                <span>Complete Registration</span>
+            </button>
+        </form>
+
+        <div style="text-align: center; margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border-color); font-size: 14px;">
+            Already have an account? <a href="{{ url_for('login') }}" style="font-weight: 600;">Sign in here</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

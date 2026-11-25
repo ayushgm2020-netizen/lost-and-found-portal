@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SmartRecover – Smart Lost and Found Management System{% endblock %}</title>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <!-- Top Navigation Bar -->
+    <header class="navbar">
+        <div class="container nav-container">
+            <a href="{{ url_for('index') }}" class="brand-logo">
+                <div class="brand-icon">
+                    <i data-lucide="shield-search" style="width: 22px; height: 22px;"></i>
+                </div>
+                <span>SmartRecover</span>
+            </a>
+
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="{{ url_for('index') }}" class="nav-link {% if request.endpoint == 'index' %}active{% endif %}">Home</a></li>
+                    <li><a href="{{ url_for('browse_items') }}" class="nav-link {% if request.endpoint == 'browse_items' %}active{% endif %}">Browse Items</a></li>
+                    <li><a href="{{ url_for('index') }}#how-it-works" class="nav-link">How It Works</a></li>
+                    <li><a href="{{ url_for('index') }}#about" class="nav-link">About</a></li>
+                </ul>
+            </nav>
+
+            <div class="nav-actions">
+                {% if session.get('user_id') %}
+                    <a href="{{ url_for('notifications') }}" class="btn btn-outline btn-sm" title="Notifications" style="position: relative; padding: 8px 12px;">
+                        <i data-lucide="bell" style="width: 16px; height: 16px;"></i>
+                        {% if unread_notifications_count and unread_notifications_count > 0 %}
+                            <span style="position: absolute; top: -4px; right: -4px; background: var(--status-danger); color: #fff; font-size: 10px; font-weight: 800; border-radius: 9999px; padding: 2px 5px; line-height: 1;">{{ unread_notifications_count }}</span>
+                        {% endif %}
+                    </a>
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-primary btn-sm">
+                        <i data-lucide="layout-dashboard" style="width: 16px; height: 16px;"></i>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="{{ url_for('logout') }}" class="btn btn-outline btn-sm" title="Logout">
+                        <i data-lucide="log-out" style="width: 16px; height: 16px;"></i>
+                    </a>
+                {% else %}
+                    <a href="{{ url_for('login') }}" class="btn btn-outline btn-sm">Sign In</a>
+                    <a href="{{ url_for('register') }}" class="btn btn-primary btn-sm">Get Started</a>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <!-- Global Flash Messages -->
+    <div class="container flash-container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-message flash-{{ category }}">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <i data-lucide="info" style="width: 18px; height: 18px;"></i>
+                            <span>{{ message }}</span>
+                        </div>
+                        <button class="flash-close" aria-label="Close message">&times;</button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Main Content Area -->
+    <main style="flex: 1;">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 14px;">
+                        <div class="brand-icon" style="width: 32px; height: 32px;">
+                            <i data-lucide="shield-search" style="width: 18px; height: 18px;"></i>
+                        </div>
+                        <span style="color: #fff; font-size: 1.2rem; font-weight: 800;">SmartRecover</span>
+                    </div>
+                    <p>“Lost Today, Found Tomorrow.” A centralized, multi-institution lost and found portal powered by Python smart similarity matching.</p>
+                </div>
+                <div class="footer-col">
+                    <h4>Platform</h4>
+                    <ul class="footer-links">
+                        <li><a href="{{ url_for('browse_items') }}">Browse Items</a></li>
+                        <li><a href="{{ url_for('report_lost') }}">Report Lost Item</a></li>
+                        <li><a href="{{ url_for('report_found') }}">Report Found Item</a></li>
+                        <li><a href="{{ url_for('matches') }}">Smart Matches</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Features</h4>
+                    <ul class="footer-links">
+                        <li><a href="{{ url_for('index') }}#smart-matching">Weighted Matching</a></li>
+                        <li><a href="{{ url_for('index') }}#verification">Secure Claims</a></li>
+                        <li><a href="{{ url_for('index') }}#institutions">Multi-Institution</a></li>
+                        <li><a href="{{ url_for('index') }}#tracking">Recovery Tracker</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Project Info</h4>
+                    <ul class="footer-links">
+                        <li><a href="#">Flask & Python 3.11</a></li>
+                        <li><a href="#">MySQL smartrecover_db</a></li>
+                        <li><a href="#">College Project Portal</a></li>
+                        <li><a href="{{ url_for('login') }}">Admin Login</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <div>&copy; 2026 SmartRecover Portal. All rights reserved. Designed for academic and institutional excellence.</div>
+                <div>Status: <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #22C55E; margin-right: 4px;"></span> Operational</div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Main JavaScript -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

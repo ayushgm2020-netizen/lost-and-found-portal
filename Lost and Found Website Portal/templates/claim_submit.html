@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}Submit Ownership Claim – SmartRecover{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: 40px 0; max-width: 680px;">
+    <div style="margin-bottom: 24px;">
+        <a href="{{ url_for('item_details', item_id=item.id) }}" class="btn btn-ghost btn-sm" style="margin-bottom: 12px;">
+            <i data-lucide="arrow-left" style="width: 14px; height: 14px;"></i> Back to Item Details
+        </a>
+        <h1 style="font-size: 2rem; color: var(--primary-navy);">Submit Ownership Verification Claim</h1>
+        <p style="font-size: 14px; color: var(--text-secondary);">
+            Verify ownership for: <strong>{{ item.name }}</strong> (Found at {{ item.location }})
+        </p>
+    </div>
+
+    <!-- Security Warning Card -->
+    <div style="background: #FEF3C7; border: 1px solid #FDE68A; border-radius: var(--radius-md); padding: 16px; margin-bottom: 24px; display: flex; gap: 12px; align-items: flex-start;">
+        <i data-lucide="shield-alert" style="width: 20px; height: 20px; color: #92400E; flex-shrink: 0; margin-top: 2px;"></i>
+        <div style="font-size: 13px; color: #78350F; line-height: 1.5;">
+            <strong>Secure Verification Protocol:</strong> False claims are strictly prohibited and violate campus honor code policies. 
+            Your submitted evidence will only be evaluated by the finder and institutional campus administrators.
+        </div>
+    </div>
+
+    <div class="card" style="padding: 32px;">
+        <form action="{{ url_for('claim_item_submit', item_id=item.id) }}" method="POST">
+            <input type="hidden" name="csrf_token" value="{{ session.get('csrf_token') }}">
+
+            <div class="form-group">
+                <label class="form-label" for="proof_details">
+                    Private Proof of Ownership <span class="required">*</span>
+                </label>
+                <textarea id="proof_details" name="proof_details" class="form-control" rows="5" placeholder="Provide distinct private identifiers only the true owner would know:
+- Serial numbers, IMEI, or model numbers
+- Exact contents inside (e.g. specific IDs, cards, keys)
+- Lock-screen wallpaper, passwords/PIN hint
+- Hidden marks, engravings, or purchase receipts..." required></textarea>
+                <div class="form-hint">
+                    Be as specific as possible. The more verifiable details you provide, the faster your claim can be approved.
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="contact_phone">Contact Phone Number for Handover <span class="required">*</span></label>
+                <input type="tel" id="contact_phone" name="contact_phone" class="form-control" placeholder="+91 9876543210" required value="{{ current_user.contact_number or '' }}">
+                <div class="form-hint">Used by security or the finder to schedule physical verification.</div>
+            </div>
+
+            <div style="display: flex; gap: 14px; margin-top: 30px;">
+                <button type="submit" class="btn btn-primary btn-lg" style="flex: 1;">
+                    <i data-lucide="shield-check" style="width: 18px; height: 18px;"></i>
+                    <span>Submit Verification Claim</span>
+                </button>
+                <a href="{{ url_for('item_details', item_id=item.id) }}" class="btn btn-outline btn-lg">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

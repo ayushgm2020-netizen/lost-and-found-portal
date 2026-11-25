@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}Sign In – SmartRecover{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: 60px 0; max-width: 460px;">
+    <div class="card" style="padding: 36px;">
+        <div style="text-align: center; margin-bottom: 28px;">
+            <div class="brand-icon" style="width: 44px; height: 44px; margin: 0 auto 14px;">
+                <i data-lucide="log-in" style="width: 24px; height: 24px;"></i>
+            </div>
+            <h2 style="font-size: 1.75rem; margin-bottom: 6px;">Welcome Back</h2>
+            <p style="font-size: 14px;">Log in to access your reports, smart matches and claims.</p>
+        </div>
+
+        <form action="{{ url_for('login') }}" method="POST">
+            <input type="hidden" name="csrf_token" value="{{ session.get('csrf_token') }}">
+
+            <div class="form-group">
+                <label class="form-label" for="email">Campus Email</label>
+                <div style="position: relative;">
+                    <input type="email" id="email" name="email" class="form-control" placeholder="name@institution.edu" required value="{{ request.form.get('email', '') }}">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 7px;">
+                    <label class="form-label" for="password" style="margin-bottom: 0;">Password</label>
+                </div>
+                <input type="password" id="password" name="password" class="form-control" placeholder="••••••••" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-lg" style="width: 100%; margin-top: 10px;">
+                <i data-lucide="arrow-right" style="width: 18px; height: 18px;"></i>
+                <span>Sign In to SmartRecover</span>
+            </button>
+        </form>
+
+        <!-- Quick Demo Accounts Helper for Examiners and Students -->
+        <div style="margin-top: 24px; background: var(--bg-subtle); border-radius: var(--radius-md); padding: 14px; border: 1px dashed var(--border-color);">
+            <div style="font-size: 12px; font-weight: 700; color: var(--primary-navy); margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+                <i data-lucide="key" style="width: 14px; height: 14px; color: var(--royal-blue);"></i>
+                <span>Demo Credentials Quick Fill:</span>
+            </div>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <button type="button" class="btn btn-outline btn-sm" onclick="fillDemo('ayush@aiet.edu', 'password123')" style="font-size: 12px; padding: 4px 10px;">
+                    Student: ayush@aiet.edu
+                </button>
+                <button type="button" class="btn btn-outline btn-sm" onclick="fillDemo('admin@aiet.edu', 'password123')" style="font-size: 12px; padding: 4px 10px;">
+                    Admin: admin@aiet.edu
+                </button>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border-color); font-size: 14px;">
+            Don’t have an account yet? <a href="{{ url_for('register') }}" style="font-weight: 600;">Register here</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function fillDemo(email, pass) {
+    document.getElementById('email').value = email;
+    document.getElementById('password').value = pass;
+}
+</script>
+{% endblock %}

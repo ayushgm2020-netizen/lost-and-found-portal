@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block title %}Browse Lost & Found Items – SmartRecover{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: 40px 0;">
+    <!-- Page Header -->
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; flex-wrap: wrap; gap: 16px;">
+        <div>
+            <h1 style="font-size: 2.1rem; color: var(--primary-navy);">Campus Items Directory</h1>
+            <p style="font-size: 14.5px; color: var(--text-secondary);">
+                Browse active lost and found reports within your college campus community.
+            </p>
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <a href="{{ url_for('report_lost') }}" class="btn btn-primary btn-sm">
+                <i data-lucide="plus" style="width: 16px; height: 16px;"></i> Report Lost
+            </a>
+            <a href="{{ url_for('report_found') }}" class="btn btn-navy btn-sm">
+                <i data-lucide="plus" style="width: 16px; height: 16px;"></i> Report Found
+            </a>
+        </div>
+    </div>
+
+    <!-- Filter & Search Controls Bar -->
+    <div class="card" style="padding: 20px; margin-bottom: 30px;">
+        <form method="GET" action="{{ url_for('browse_items') }}" style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr auto; gap: 14px; align-items: center;">
+            <!-- Search Query -->
+            <div>
+                <label class="form-label" style="font-size: 12px; margin-bottom: 4px;">Search Keyword</label>
+                <div style="position: relative;">
+                    <input type="text" id="live-search-input" name="q" class="form-control" placeholder="Search item title or location..." value="{{ current_query }}">
+                </div>
+            </div>
+
+            <!-- Category Filter -->
+            <div>
+                <label class="form-label" style="font-size: 12px; margin-bottom: 4px;">Category</label>
+                <select id="category-filter" name="category" class="form-control">
+                    <option value="">All Categories</option>
+                    {% for cat in ['Electronics', 'Accessories', 'Documents', 'Books and Stationery', 'Clothing', 'Personal Belongings', 'Other'] %}
+                        <option value="{{ cat }}" {% if current_category == cat %}selected{% endif %}>{{ cat }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Type Filter -->
+            <div>
+                <label class="form-label" style="font-size: 12px; margin-bottom: 4px;">Report Type</label>
+                <select id="type-filter" name="type" class="form-control">
+                    <option value="">All Types</option>
+                    <option value="lost" {% if current_type == 'lost' %}selected{% endif %}>Lost Items Only</option>
+                    <option value="found" {% if current_type == 'found' %}selected{% endif %}>Found Items Only</option>
+                </select>
+            </div>
+
+            <!-- Institution Filter (if logged in, defaults to user's institution; non-logged-in can select) -->
+            <div>
+                <label class="form-label" style="font-size: 12px; margin-bottom: 4px;">Institution</label>
+                <select name="institution_id" class="form-control">
+                    {% for inst in institutions %}
+                        <option value="{{ inst.id }}" {% if current_institution_id == inst.id|string or current_institution_id == inst.id %}selected{% endif %}>
+                            {{ inst.code }} - {{ inst.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div style="padding-top: 20px;">
+                <button type="submit" class="btn btn-primary btn-sm" style="height: 42px; padding: 0 18px;">
+                    <i data-lucide="filter" style="width: 15px; height: 15px;"></i> Filter
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Active Filters Count -->
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; font-size: 13.5px; color: var(--text-secondary);">
+        <div>
+            Showing <strong>{{ items|length }}</strong> active item records
+            {% if selected_institution_name %}
+                for <strong>{{ selected_institution_name }}</strong>
+            {% endif %}
+        </div>
+        <div style="display: flex; gap: 8px;">
+            <a href="{{ url_for('browse_items') }}" class="btn btn-ghost btn-sm" style="font-size: 12px;">Reset Filters</a>
+        </div>
+    </div>
+
+    <!-- Items Grid -->
+    {% if items %}
+        <div class="items-grid" id="browse-items-grid">
+            {% for item in items %}
+                <div class="item-card browse-item-card" 
+                     data-name="{{ item.name|lower }}" 
+                     data-category="{{ item.category|lower }}" 
+                     data-type="{{ item.type }}" 
+                     data-location="{{ item.location|lower }}">
+                    <div class="item-card-image">
+                        {% if item.photo_filename %}
+                            <img src="{{ url_for('static', filename='uploads/' + item.photo_filename) }}" alt="{{ item.name }}" loading="lazy">
+                        {% else %}
+                            <div style="color: var(--text-muted); display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                                <i data-lucide="image" style="width: 32px; height: 32px;"></i>
+                                <span style="font-size: 12px;">No Photo Uploaded</span>
+                            </div>
+                        {% endif %}
+
+                        {% if item.type == 'lost' %}
+                            <span class="item-badge-type badge-lost">Lost</span>
+                        {% else %}
+                            <span class="item-badge-type badge-found">Found</span>
+                        {% endif %}
+
+                        <span class="item-badge-status">{{ item.status|replace('_', ' ')|capitalize }}</span>
+                    </div>
+
+                    <div class="item-card-body">
+                        <div class="item-category-tag">
+                            <i data-lucide="tag" style="width: 12px; height: 12px;"></i>
+                            <span>{{ item.category }}</span>
+                        </div>
+
+                        <h4 class="item-card-title" title="{{ item.name }}">{{ item.name }}</h4>
+                        <p class="item-card-desc">{{ item.description }}</p>
+
+                        <div class="item-meta">
+                            <div class="item-meta-row">
+                                <i data-lucide="map-pin" style="width: 14px; height: 14px;"></i>
+                                <span>{{ item.location }}</span>
+                            </div>
+                            <div class="item-meta-row">
+                                <i data-lucide="calendar" style="width: 14px; height: 14px;"></i>
+                                <span>{{ item.date_event }}</span>
+                            </div>
+                            <div class="item-meta-row" style="font-size: 11.5px; color: var(--text-muted);">
+                                <i data-lucide="building" style="width: 13px; height: 13px;"></i>
+                                <span>{{ item.institution_name }}</span>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; gap: 8px; margin-top: auto;">
+                            <a href="{{ url_for('item_details', item_id=item.id) }}" class="btn btn-outline btn-sm" style="flex: 1;">
+                                View Details
+                            </a>
+                            {% if item.type == 'found' and item.status not in ('recovered', 'closed') %}
+                                <a href="{{ url_for('claim_item_page', item_id=item.id) }}" class="btn btn-primary btn-sm" title="Claim this found item">
+                                    <i data-lucide="shield-check" style="width: 14px; height: 14px;"></i> Claim
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        <div id="no-filter-results" class="card" style="display: none; text-align: center; padding: 40px; margin-top: 20px;">
+            <p>No items matched your search filter criteria.</p>
+        </div>
+    {% else %}
+        <div class="card" style="text-align: center; padding: 60px 20px;">
+            <div style="width: 56px; height: 56px; border-radius: 50%; background: var(--bg-subtle); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; color: var(--text-muted);">
+                <i data-lucide="inbox" style="width: 28px; height: 28px;"></i>
+            </div>
+            <h3 style="margin-bottom: 8px;">No Item Reports Found</h3>
+            <p style="max-width: 450px; margin: 0 auto 20px;">
+                There are no reports matching your selection in this institution. Try clearing filters or submit a new report.
+            </p>
+            <div style="display: flex; justify-content: center; gap: 10px;">
+                <a href="{{ url_for('report_lost') }}" class="btn btn-primary btn-sm">Report Lost</a>
+                <a href="{{ url_for('report_found') }}" class="btn btn-navy btn-sm">Report Found</a>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

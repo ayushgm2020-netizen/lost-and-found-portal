@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+
+{% block title %}Claims & Ownership Verification – SmartRecover{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div style="padding: 0 14px 18px; border-bottom: 1px solid var(--border-color); margin-bottom: 14px;">
+            <div style="font-weight: 700; color: var(--primary-navy); font-size: 15px;">{{ current_user.full_name }}</div>
+            <div style="font-size: 12.5px; color: var(--text-muted); display: flex; align-items: center; gap: 4px; margin-top: 2px;">
+                <i data-lucide="building" style="width: 12px; height: 12px;"></i>
+                <span>{{ institution.code }} • {{ current_user.role|capitalize }}</span>
+            </div>
+        </div>
+
+        <ul class="sidebar-menu">
+            <li>
+                <a href="{{ url_for('dashboard') }}" class="sidebar-link">
+                    <i data-lucide="layout-dashboard" style="width: 18px; height: 18px;"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('matches') }}" class="sidebar-link">
+                    <i data-lucide="sparkles" style="width: 18px; height: 18px;"></i>
+                    <span>Smart Matches</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('claims') }}" class="sidebar-link active">
+                    <i data-lucide="shield-check" style="width: 18px; height: 18px;"></i>
+                    <span>My Claims & Reviews</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('notifications') }}" class="sidebar-link">
+                    <i data-lucide="bell" style="width: 18px; height: 18px;"></i>
+                    <span>Notifications</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('browse_items') }}" class="sidebar-link">
+                    <i data-lucide="compass" style="width: 18px; height: 18px;"></i>
+                    <span>Browse Items</span>
+                </a>
+            </li>
+        </ul>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="dashboard-main">
+        <div style="margin-bottom: 28px;">
+            <h1 style="font-size: 1.85rem; color: var(--primary-navy);">Claims & Ownership Verification</h1>
+            <p style="font-size: 14px; color: var(--text-secondary);">
+                Manage claims submitted on your found reports and monitor the verification status of claims you submitted.
+            </p>
+        </div>
+
+        <!-- Section 1: Inbound Claims (Claims to Review on Items Found) -->
+        <div class="card" style="margin-bottom: 30px;">
+            <div class="card-header">
+                <div>
+                    <h3 class="card-title">Claims to Review (On Items You Found)</h3>
+                    <p style="font-size: 13px; margin-top: 2px;">Other students have claimed items you reported finding.</p>
+                </div>
+            </div>
+
+            {% if claims_to_review %}
+                <div style="display: flex; flex-direction: column; gap: 16px;">
+                    {% for c in claims_to_review %}
+                        <div style="border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 20px; background: #fff;">
+                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                                <div>
+                                    <h4 style="font-size: 1.1rem; color: var(--primary-navy); margin-bottom: 2px;">
+                                        Claim for: <a href="{{ url_for('item_details', item_id=c.item_id) }}">{{ c.item_name }}</a>
+                                    </h4>
+                                    <div style="font-size: 13px; color: var(--text-muted);">
+                                        Claimant: <strong>{{ c.claimant_name }}</strong> ({{ c.claimant_email }}) • Phone: {{ c.contact_phone }}
+                                    </div>
+                                </div>
+                                <span style="font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 9999px; 
+                                      {% if c.status == 'approved' %}background: var(--status-success-bg); color: var(--status-success);
+                                      {% elif c.status == 'rejected' %}background: var(--status-danger-bg); color: var(--status-danger);
+                                      {% else %}background: var(--status-warning-bg); color: var(--status-warning);{% endif %}">
+                                    {{ c.status|upper }}
+                                </span>
+                            </div>
+
+                            <!-- Private Proof Box -->
+                            <div style="background: var(--bg-subtle); padding: 14px; border-radius: var(--radius-sm); margin-bottom: 14px; border: 1px solid #E2E8F0;">
+                                <div style="font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase;">
+                                    Submitted Ownership Proof Evidence:
+                                </div>
+                                <div style="font-size: 14px; color: var(--text-primary); white-space: pre-wrap;">{{ c.proof_details }}</div>
+                            </div>
+
+                            {% if c.status == 'pending' or c.status == 'under_review' %}
+                                <form action="{{ url_for('review_claim', claim_id=c.id) }}" method="POST" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                                    <input type="hidden" name="csrf_token" value="{{ session.get('csrf_token') }}">
+                                    <input type="text" name="review_notes" class="form-control" placeholder="Review notes (optional)..." style="flex: 1; min-width: 200px;">
+                                    <button type="submit" name="decision" value="approve" class="btn btn-primary btn-sm">
+                                        <i data-lucide="check" style="width: 14px; height: 14px;"></i> Approve Ownership
+                                    </button>
+                                    <button type="submit" name="decision" value="reject" class="btn btn-danger btn-sm" onclick="return confirm('Reject this claim?');">
+                                        <i data-lucide="x" style="width: 14px; height: 14px;"></i> Reject Claim
+                                    </button>
+                                </form>
+                            {% else %}
+                                <div style="font-size: 13px; color: var(--text-muted);">
+                                    Resolved by {{ c.reviewer_name or 'Reviewer' }}. Notes: {{ c.review_notes or 'None' }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div style="text-align: center; padding: 30px; color: var(--text-muted);">
+                    <i data-lucide="check-circle" style="width: 32px; height: 32px; color: var(--status-success); margin-bottom: 8px;"></i>
+                    <p>No pending claims submitted on your found items.</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Section 2: Outbound Claims (Claims I Submitted) -->
+        <div class="card">
+            <div class="card-header">
+                <div>
+                    <h3 class="card-title">My Submitted Claims</h3>
+                    <p style="font-size: 13px; margin-top: 2px;">Claims you filed to recover items found by others.</p>
+                </div>
+            </div>
+
+            {% if my_claims %}
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px;">
+                        <thead>
+                            <tr style="border-bottom: 2px solid var(--border-color); color: var(--text-secondary);">
+                                <th style="padding: 12px 14px;">Item Name</th>
+                                <th style="padding: 12px 14px;">Category</th>
+                                <th style="padding: 12px 14px;">Claim Date</th>
+                                <th style="padding: 12px 14px;">Status</th>
+                                <th style="padding: 12px 14px;">Review Notes</th>
+                                <th style="padding: 12px 14px; text-align: right;">Item Link</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for c in my_claims %}
+                                <tr style="border-bottom: 1px solid var(--border-color);">
+                                    <td style="padding: 12px 14px; font-weight: 600; color: var(--primary-navy);">
+                                        {{ c.item_name }}
+                                    </td>
+                                    <td style="padding: 12px 14px; color: var(--text-secondary);">{{ c.category }}</td>
+                                    <td style="padding: 12px 14px; color: var(--text-secondary);">{{ c.created_at }}</td>
+                                    <td style="padding: 12px 14px;">
+                                        <span style="font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 9999px;
+                                              {% if c.status == 'approved' %}background: var(--status-success-bg); color: var(--status-success);
+                                              {% elif c.status == 'rejected' %}background: var(--status-danger-bg); color: var(--status-danger);
+                                              {% else %}background: var(--status-warning-bg); color: var(--status-warning);{% endif %}">
+                                            {{ c.status|capitalize }}
+                                        </span>
+                                    </td>
+                                    <td style="padding: 12px 14px; color: var(--text-secondary); font-size: 13px;">
+                                        {{ c.review_notes or 'Pending review' }}
+                                    </td>
+                                    <td style="padding: 12px 14px; text-align: right;">
+                                        <a href="{{ url_for('item_details', item_id=c.item_id) }}" class="btn btn-outline btn-sm">
+                                            View Item
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div style="text-align: center; padding: 30px; color: var(--text-muted);">
+                    <p>You have not submitted any ownership claims yet.</p>
+                </div>
+            {% endif %}
+        </div>
+    </main>
+</div>
+{% endblock %}

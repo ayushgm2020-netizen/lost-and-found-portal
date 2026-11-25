@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}Notifications – SmartRecover{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div style="padding: 0 14px 18px; border-bottom: 1px solid var(--border-color); margin-bottom: 14px;">
+            <div style="font-weight: 700; color: var(--primary-navy); font-size: 15px;">{{ current_user.full_name }}</div>
+            <div style="font-size: 12.5px; color: var(--text-muted); display: flex; align-items: center; gap: 4px; margin-top: 2px;">
+                <i data-lucide="building" style="width: 12px; height: 12px;"></i>
+                <span>{{ institution.code }} • {{ current_user.role|capitalize }}</span>
+            </div>
+        </div>
+
+        <ul class="sidebar-menu">
+            <li>
+                <a href="{{ url_for('dashboard') }}" class="sidebar-link">
+                    <i data-lucide="layout-dashboard" style="width: 18px; height: 18px;"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('matches') }}" class="sidebar-link">
+                    <i data-lucide="sparkles" style="width: 18px; height: 18px;"></i>
+                    <span>Smart Matches</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('claims') }}" class="sidebar-link">
+                    <i data-lucide="shield-check" style="width: 18px; height: 18px;"></i>
+                    <span>My Claims & Reviews</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('notifications') }}" class="sidebar-link active">
+                    <i data-lucide="bell" style="width: 18px; height: 18px;"></i>
+                    <span>Notifications</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('profile') }}" class="sidebar-link">
+                    <i data-lucide="user" style="width: 18px; height: 18px;"></i>
+                    <span>Profile Settings</span>
+                </a>
+            </li>
+        </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="dashboard-main" style="max-width: 850px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px;">
+            <div>
+                <h1 style="font-size: 1.85rem; color: var(--primary-navy);">Notifications Center</h1>
+                <p style="font-size: 14px; color: var(--text-secondary);">
+                    Updates on your reports, smart similarity matches, and claim reviews.
+                </p>
+            </div>
+            {% if notifications %}
+                <form action="{{ url_for('mark_all_notifications_read') }}" method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ session.get('csrf_token') }}">
+                    <button type="submit" class="btn btn-outline btn-sm">
+                        <i data-lucide="check-check" style="width: 14px; height: 14px;"></i> Mark All Read
+                    </button>
+                </form>
+            {% endif %}
+        </div>
+
+        {% if notifications %}
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                {% for n in notifications %}
+                    <div class="card" style="padding: 18px; display: flex; align-items: flex-start; gap: 16px; {% if not n.is_read %}background: #F0F7FF; border-color: var(--accent-border);{% endif %}">
+                        <div style="width: 40px; height: 40px; border-radius: 50%; background: var(--accent-light); color: var(--royal-blue); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                            <i data-lucide="bell" style="width: 18px; height: 18px;"></i>
+                        </div>
+                        <div style="flex: 1;">
+                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
+                                <h4 style="font-size: 1rem; color: var(--primary-navy); margin-bottom: 0;">
+                                    {{ n.title }}
+                                </h4>
+                                <span style="font-size: 12px; color: var(--text-muted);">
+                                    {{ n.created_at }}
+                                </span>
+                            </div>
+                            <p style="font-size: 13.5px; color: var(--text-secondary); margin-bottom: 8px;">
+                                {{ n.message }}
+                            </p>
+                            {% if n.link %}
+                                <a href="{{ n.link }}" class="btn btn-outline btn-sm" style="font-size: 12px; padding: 4px 10px;">
+                                    View Related Item / Match <i data-lucide="arrow-right" style="width: 12px; height: 12px;"></i>
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="card" style="text-align: center; padding: 50px 20px;">
+                <i data-lucide="bell-off" style="width: 36px; height: 36px; color: var(--text-muted); margin-bottom: 8px;"></i>
+                <h3 style="margin-bottom: 6px;">All Caught Up</h3>
+                <p>You have no notifications at this time.</p>
+            </div>
+        {% endif %}
+    </main>
+</div>
+{% endblock %}

@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block title %}User Profile – SmartRecover{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div style="padding: 0 14px 18px; border-bottom: 1px solid var(--border-color); margin-bottom: 14px;">
+            <div style="font-weight: 700; color: var(--primary-navy); font-size: 15px;">{{ current_user.full_name }}</div>
+            <div style="font-size: 12.5px; color: var(--text-muted); display: flex; align-items: center; gap: 4px; margin-top: 2px;">
+                <i data-lucide="building" style="width: 12px; height: 12px;"></i>
+                <span>{{ institution.code }} • {{ current_user.role|capitalize }}</span>
+            </div>
+        </div>
+
+        <ul class="sidebar-menu">
+            <li>
+                <a href="{{ url_for('dashboard') }}" class="sidebar-link">
+                    <i data-lucide="layout-dashboard" style="width: 18px; height: 18px;"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('matches') }}" class="sidebar-link">
+                    <i data-lucide="sparkles" style="width: 18px; height: 18px;"></i>
+                    <span>Smart Matches</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('claims') }}" class="sidebar-link">
+                    <i data-lucide="shield-check" style="width: 18px; height: 18px;"></i>
+                    <span>My Claims & Reviews</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('notifications') }}" class="sidebar-link">
+                    <i data-lucide="bell" style="width: 18px; height: 18px;"></i>
+                    <span>Notifications</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('profile') }}" class="sidebar-link active">
+                    <i data-lucide="user" style="width: 18px; height: 18px;"></i>
+                    <span>Profile Settings</span>
+                </a>
+            </li>
+        </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="dashboard-main" style="max-width: 800px;">
+        <div style="margin-bottom: 28px;">
+            <h1 style="font-size: 1.85rem; color: var(--primary-navy);">Profile Settings</h1>
+            <p style="font-size: 14px; color: var(--text-secondary);">
+                View your personal credentials and campus affiliation information.
+            </p>
+        </div>
+
+        <div class="card" style="padding: 30px; margin-bottom: 24px;">
+            <div class="card-header">
+                <h3 class="card-title">Personal Information</h3>
+            </div>
+
+            <form action="{{ url_for('profile') }}" method="POST">
+                <input type="hidden" name="csrf_token" value="{{ session.get('csrf_token') }}">
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Full Name</label>
+                        <input type="text" name="full_name" class="form-control" value="{{ current_user.full_name }}" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Contact Phone</label>
+                        <input type="tel" name="contact_number" class="form-control" value="{{ current_user.contact_number or '' }}" placeholder="+91 9876543210">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Campus Email Address</label>
+                    <input type="email" class="form-control" value="{{ current_user.email }}" disabled style="background: var(--bg-subtle);">
+                    <div class="form-hint">Email is linked to your institutional account and cannot be modified.</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Account Role</label>
+                    <input type="text" class="form-control" value="{{ current_user.role|capitalize }}" disabled style="background: var(--bg-subtle);">
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-sm" style="margin-top: 10px;">
+                    <i data-lucide="save" style="width: 16px; height: 16px;"></i> Save Changes
+                </button>
+            </form>
+        </div>
+
+        <div class="card" style="padding: 30px;">
+            <div class="card-header">
+                <h3 class="card-title">Institutional Boundary Affiliation</h3>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 12px; font-size: 14px;">
+                <div><strong>Institution Name:</strong> {{ institution.name }}</div>
+                <div><strong>Institution Code:</strong> <span class="hero-pill" style="margin: 0; padding: 2px 10px; font-size: 12px;">{{ institution.code }}</span></div>
+                <div><strong>Domain:</strong> {{ institution.domain }}</div>
+                <div><strong>Campus Location:</strong> {{ institution.location }}</div>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}

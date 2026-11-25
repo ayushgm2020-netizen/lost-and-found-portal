@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+
+{% block title %}{{ item.name }} – SmartRecover{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: 40px 0; max-width: 960px;">
+    <!-- Breadcrumb / Back -->
+    <div style="margin-bottom: 20px;">
+        <a href="{{ url_for('browse_items') }}" class="btn btn-ghost btn-sm">
+            <i data-lucide="arrow-left" style="width: 14px; height: 14px;"></i> Back to Items Directory
+        </a>
+    </div>
+
+    <!-- Status Timeline Tracker -->
+    <div class="card" style="padding: 24px; margin-bottom: 28px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+            <div style="font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--royal-blue);">
+                Recovery Lifecycle Tracker
+            </div>
+            <span style="font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 9999px; background: var(--bg-subtle);">
+                Status: {{ item.status|replace('_', ' ')|capitalize }}
+            </span>
+        </div>
+
+        {% set steps = [
+            ('reported', 'Reported'),
+            ('match_found', 'Match Found'),
+            ('claim_submitted', 'Claim Submitted'),
+            ('under_verification', 'Verification'),
+            ('approved', 'Approved'),
+            ('recovered', 'Recovered')
+        ] %}
+
+        <div class="timeline">
+            {% set current_idx = 0 %}
+            {% if item.status == 'reported' %}{% set current_idx = 0 %}
+            {% elif item.status == 'match_found' %}{% set current_idx = 1 %}
+            {% elif item.status == 'claim_submitted' %}{% set current_idx = 2 %}
+            {% elif item.status == 'under_verification' %}{% set current_idx = 3 %}
+            {% elif item.status == 'approved' %}{% set current_idx = 4 %}
+            {% elif item.status in ('recovered', 'closed') %}{% set current_idx = 5 %}
+            {% endif %}
+
+            {% for step_id, step_name in steps %}
+                <div class="timeline-step {% if loop.index0 < current_idx %}completed{% elif loop.index0 == current_idx %}active{% endif %}">
+                    <div class="timeline-node">
+                        {% if loop.index0 < current_idx %}
+                            <i data-lucide="check" style="width: 16px; height: 16px;"></i>
+                        {% else %}
+                            {{ loop.index }}
+                        {% endif %}
+                    </div>
+                    <div class="timeline-label">{{ step_name }}</div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Item Main Content Grid -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+        <!-- Left Column: Photograph and Status -->
+        <div>
+            <div class="card" style="padding: 0; overflow: hidden; margin-bottom: 24px;">
+                <div style="height: 340px; background: #E2E8F0; display: flex; align-items: center; justify-content: center; position: relative;">
+                    {% if item.photo_filename %}
+                        <img src="{{ url_for('static', filename='uploads/' + item.photo_filename) }}" alt="{{ item.name }}" style="width: 100%; height: 100%; object-fit: contain; background: #000;">
+                    {% else %}
+                        <div style="text-align: center; color: var(--text-muted);">
+                            <i data-lucide="image" style="width: 48px; height: 48px; margin-bottom: 8px;"></i>
+                            <p style="font-size: 13px;">No Photograph Provided</p>
+                        </div>
+                    {% endif %}
+
+                    {% if item.type == 'lost' %}
+                        <span class="item-badge-type badge-lost">Lost Item</span>
+                    {% else %}
+                        <span class="item-badge-type badge-found">Found Item</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Ownership / Verification Notice -->
+            {% if is_owner or is_admin %}
+                <div class="card" style="background: #F8FAFC; border: 1px dashed var(--royal-blue); padding: 20px;">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                        <i data-lucide="lock" style="width: 18px; height: 18px; color: var(--royal-blue);"></i>
+                        <h4 style="font-size: 14px; margin-bottom: 0;">Confidential Information (Private)</h4>
+                    </div>
+                    <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 10px;">
+                        This information is only visible to you (the reporter) and authorized campus moderators:
+                    </p>
+                    <div style="background: #fff; padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); font-size: 13.5px; font-family: monospace;">
+                        {{ item.private_details if item.private_details else "No private details entered." }}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Right Column: Metadata & Actions -->
+        <div>
+            <div class="card" style="padding: 28px;">
+                <div class="item-category-tag" style="font-size: 13px; margin-bottom: 8px;">
+                    <i data-lucide="tag" style="width: 14px; height: 14px;"></i>
+                    <span>{{ item.category }}</span>
+                </div>
+
+                <h1 style="font-size: 1.8rem; margin-bottom: 12px; color: var(--primary-navy);">{{ item.name }}</h1>
+
+                <div class="item-meta" style="border-top: none; padding-top: 0; margin-bottom: 20px;">
+                    <div class="item-meta-row" style="font-size: 14px;">
+                        <i data-lucide="map-pin" style="width: 16px; height: 16px; color: var(--royal-blue);"></i>
+                        <span><strong>Location:</strong> {{ item.location }}</span>
+                    </div>
+                    <div class="item-meta-row" style="font-size: 14px;">
+                        <i data-lucide="calendar" style="width: 16px; height: 16px; color: var(--royal-blue);"></i>
+                        <span><strong>Date:</strong> {{ item.date_event }}</span>
+                    </div>
+                    <div class="item-meta-row" style="font-size: 14px;">
+                        <i data-lucide="building" style="width: 16px; height: 16px; color: var(--royal-blue);"></i>
+                        <span><strong>Institution:</strong> {{ item.institution_name }} ({{ item.institution_code }})</span>
+                    </div>
+                    <div class="item-meta-row" style="font-size: 14px;">
+                        <i data-lucide="clock" style="width: 16px; height: 16px; color: var(--text-muted);"></i>
+                        <span><strong>Reported on:</strong> {{ item.created_at }}</span>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 24px;">
+                    <h4 style="font-size: 14px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 8px;">
+                        Description
+                    </h4>
+                    <p style="font-size: 14.5px; line-height: 1.7; color: var(--text-primary);">
+                        {{ item.description }}
+                    </p>
+                </div>
+
+                <!-- Actions depending on item type and user -->
+                <div style="display: flex; flex-direction: column; gap: 12px; border-top: 1px solid var(--border-color); padding-top: 20px;">
+                    {% if item.type == 'found' and item.status not in ('recovered', 'closed') %}
+                        {% if not is_owner %}
+                            <a href="{{ url_for('claim_item_page', item_id=item.id) }}" class="btn btn-primary btn-lg">
+                                <i data-lucide="shield-check" style="width: 18px; height: 18px;"></i>
+                                <span>This Is My Item – Submit Claim</span>
+                            </a>
+                        {% else %}
+                            <div style="font-size: 13px; color: var(--text-muted); font-style: italic;">
+                                You reported finding this item. Manage incoming claims from your dashboard.
+                            </div>
+                        {% endif %}
+                    {% endif %}
+
+                    {% if is_owner or is_admin %}
+                        {% if item.status not in ('recovered', 'closed') %}
+                            <form action="{{ url_for('mark_item_recovered', item_id=item.id) }}" method="POST" onsubmit="return confirm('Mark this item as recovered/returned? This will close active matches.');">
+                                <input type="hidden" name="csrf_token" value="{{ session.get('csrf_token') }}">
+                                <button type="submit" class="btn btn-navy" style="width: 100%;">
+                                    <i data-lucide="check-check" style="width: 16px; height: 16px;"></i>
+                                    <span>Mark Item as Recovered & Handed Over</span>
+                                </button>
+                            </form>
+                        {% endif %}
+                    {% endif %}
+
+                    <a href="{{ url_for('matches') }}" class="btn btn-outline">
+                        <i data-lucide="sparkles" style="width: 16px; height: 16px; color: var(--royal-blue);"></i>
+                        <span>Scan Smart Matches in {{ item.institution_code }}</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

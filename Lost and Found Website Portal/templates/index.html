@@ -1,0 +1,362 @@
+{% extends "base.html" %}
+
+{% block title %}SmartRecover – Lost Today, Found Tomorrow{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container hero-content">
+        <div class="hero-pill">
+            <i data-lucide="sparkles" style="width: 14px; height: 14px;"></i>
+            <span>Python-Powered Smart Matching Engine</span>
+        </div>
+        <h1 class="hero-title">
+            Lost Something?<br><span>Let’s Help You Find It.</span>
+        </h1>
+        <p class="hero-subtitle">
+            SmartRecover connects people who have lost belongings with those who have found them. 
+            Report, match, verify and recover your belongings through one unified, secure campus platform.
+        </p>
+        <div class="hero-buttons">
+            <a href="{{ url_for('report_lost') }}" class="btn btn-primary btn-lg">
+                <i data-lucide="search" style="width: 18px; height: 18px;"></i>
+                <span>Report Lost Item</span>
+            </a>
+            <a href="{{ url_for('report_found') }}" class="btn btn-navy btn-lg">
+                <i data-lucide="package-check" style="width: 18px; height: 18px;"></i>
+                <span>Report Found Item</span>
+            </a>
+            <a href="{{ url_for('browse_items') }}" class="btn btn-outline btn-lg">
+                <i data-lucide="compass" style="width: 18px; height: 18px;"></i>
+                <span>Explore Items</span>
+            </a>
+        </div>
+
+        <!-- Interactive Visual Preview Card -->
+        <div class="hero-showcase">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <div style="width: 10px; height: 10px; border-radius: 50%; background: #EF4444;"></div>
+                    <div style="width: 10px; height: 10px; border-radius: 50%; background: #F59E0B;"></div>
+                    <div style="width: 10px; height: 10px; border-radius: 50%; background: #10B981;"></div>
+                    <span style="font-size: 12px; font-weight: 600; color: var(--text-muted); margin-left: 8px;">SmartRecover Engine v2.4 • Live Match Synthesis</span>
+                </div>
+                <span class="match-score-badge match-strong" style="font-size: 11.5px;">
+                    <i data-lucide="check-check" style="width: 14px; height: 14px;"></i> 91.5% Match Confidence
+                </span>
+            </div>
+
+            <div class="match-flow-preview">
+                <!-- Lost Side -->
+                <div class="match-flow-card">
+                    <span class="item-badge-type badge-lost" style="position: static; margin-bottom: 8px; display: inline-block;">Lost Report #1042</span>
+                    <h4 style="font-size: 1.05rem; margin-bottom: 4px;">Midnight Blue Apple AirPods Pro</h4>
+                    <p style="font-size: 12.5px; color: var(--text-secondary); margin-bottom: 8px;">Category: Electronics • Reported by Student</p>
+                    <div style="font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 6px;">
+                        <i data-lucide="map-pin" style="width: 13px; height: 13px;"></i> Main Library, 2nd Floor Reading Room
+                    </div>
+                </div>
+
+                <!-- Match Gauge / Connector -->
+                <div class="flow-connector">
+                    <div class="score-circle">
+                        92%
+                        <span>Match</span>
+                    </div>
+                    <div style="font-size: 11px; font-weight: 700; color: var(--royal-blue); background: var(--accent-light); padding: 2px 8px; border-radius: 9999px;">
+                        Strong Match
+                    </div>
+                </div>
+
+                <!-- Found Side -->
+                <div class="match-flow-card">
+                    <span class="item-badge-type badge-found" style="position: static; margin-bottom: 8px; display: inline-block;">Found Report #2088</span>
+                    <h4 style="font-size: 1.05rem; margin-bottom: 4px;">Blue Case Wireless Earbuds</h4>
+                    <p style="font-size: 12.5px; color: var(--text-secondary); margin-bottom: 8px;">Category: Electronics • Turned into Security</p>
+                    <div style="font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 6px;">
+                        <i data-lucide="map-pin" style="width: 13px; height: 13px;"></i> Central Library, Table 14
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Actual Platform Statistics -->
+<section style="padding: 30px 0 60px;">
+    <div class="container">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i data-lucide="clipboard-list" style="width: 24px; height: 24px;"></i>
+                </div>
+                <div>
+                    <div class="stat-number">{{ stats.total_items }}</div>
+                    <div class="stat-label">Total Reported Items</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon" style="background: var(--status-success-bg); color: var(--status-success);">
+                    <i data-lucide="check-circle-2" style="width: 24px; height: 24px;"></i>
+                </div>
+                <div>
+                    <div class="stat-number">{{ stats.recovered_items }}</div>
+                    <div class="stat-label">Items Recovered</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon" style="background: #F3E8FF; color: #7E22CE;">
+                    <i data-lucide="building-2" style="width: 24px; height: 24px;"></i>
+                </div>
+                <div>
+                    <div class="stat-number">{{ stats.total_institutions }}</div>
+                    <div class="stat-label">Registered Institutions</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon" style="background: #FEF3C7; color: #B45309;">
+                    <i data-lucide="users" style="width: 24px; height: 24px;"></i>
+                </div>
+                <div>
+                    <div class="stat-number">{{ stats.total_users }}</div>
+                    <div class="stat-label">Active Members</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works Section -->
+<section id="how-it-works" style="padding: 70px 0; background: #fff; border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color);">
+    <div class="container">
+        <div class="section-header">
+            <div class="section-tag">Streamlined Recovery Process</div>
+            <h2 class="section-title">How SmartRecover Works</h2>
+            <p class="section-desc">From losing an item to safe verification and handover in four transparent steps.</p>
+        </div>
+
+        <div class="features-grid">
+            <div class="feature-box">
+                <div class="feature-icon-wrapper">
+                    <i data-lucide="file-plus-2" style="width: 24px; height: 24px;"></i>
+                </div>
+                <div style="font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 4px;">STEP 01</div>
+                <h3>Report an Item</h3>
+                <p>Submit item details, date, campus location, photos, and confidential identifying markers.</p>
+            </div>
+
+            <div class="feature-box">
+                <div class="feature-icon-wrapper" style="background: #EEF2FF; color: #4338CA;">
+                    <i data-lucide="cpu" style="width: 24px; height: 24px;"></i>
+                </div>
+                <div style="font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 4px;">STEP 02</div>
+                <h3>Find Smart Matches</h3>
+                <p>Our Python engine instantly compares reports within your college across 5 weighted factors.</p>
+            </div>
+
+            <div class="feature-box">
+                <div class="feature-icon-wrapper" style="background: #FEF3C7; color: #B45309;">
+                    <i data-lucide="shield-check" style="width: 24px; height: 24px;"></i>
+                </div>
+                <div style="font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 4px;">STEP 03</div>
+                <h3>Verify Ownership</h3>
+                <p>Claimants submit private proof. Finders and administrators review claims securely without data leaks.</p>
+            </div>
+
+            <div class="feature-box">
+                <div class="feature-icon-wrapper" style="background: var(--status-success-bg); color: var(--status-success);">
+                    <i data-lucide="handshake" style="width: 24px; height: 24px;"></i>
+                </div>
+                <div style="font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 4px;">STEP 04</div>
+                <h3>Recover Belongings</h3>
+                <p>Coordinate return at designated security points and close reports with confirmed status updates.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Lost & Found Items -->
+<section style="padding: 70px 0;">
+    <div class="container">
+        <!-- Featured Lost Items -->
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px;">
+            <div>
+                <h3 style="font-size: 1.5rem; color: var(--primary-navy);">Recently Reported Lost Items</h3>
+                <p style="font-size: 14px;">Help fellow campus members locate their misplaced belongings.</p>
+            </div>
+            <a href="{{ url_for('browse_items', type='lost') }}" class="btn btn-outline btn-sm">
+                View All Lost <i data-lucide="arrow-right" style="width: 14px; height: 14px;"></i>
+            </a>
+        </div>
+
+        {% if featured_lost %}
+            <div class="items-grid" style="margin-bottom: 50px;">
+                {% for item in featured_lost %}
+                    <div class="item-card">
+                        <div class="item-card-image">
+                            {% if item.photo_filename %}
+                                <img src="{{ url_for('static', filename='uploads/' + item.photo_filename) }}" alt="{{ item.name }}">
+                            {% else %}
+                                <div style="color: var(--text-muted); display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                                    <i data-lucide="image" style="width: 32px; height: 32px;"></i>
+                                    <span style="font-size: 12px;">No Photo Uploaded</span>
+                                </div>
+                            {% endif %}
+                            <span class="item-badge-type badge-lost">Lost</span>
+                            <span class="item-badge-status">{{ item.status|capitalize }}</span>
+                        </div>
+                        <div class="item-card-body">
+                            <div class="item-category-tag">
+                                <i data-lucide="tag" style="width: 13px; height: 13px;"></i>
+                                <span>{{ item.category }}</span>
+                            </div>
+                            <h4 class="item-card-title">{{ item.name }}</h4>
+                            <p class="item-card-desc">{{ item.description }}</p>
+                            <div class="item-meta">
+                                <div class="item-meta-row">
+                                    <i data-lucide="map-pin" style="width: 14px; height: 14px;"></i>
+                                    <span>{{ item.location }}</span>
+                                </div>
+                                <div class="item-meta-row">
+                                    <i data-lucide="calendar" style="width: 14px; height: 14px;"></i>
+                                    <span>{{ item.date_event }}</span>
+                                </div>
+                            </div>
+                            <a href="{{ url_for('item_details', item_id=item.id) }}" class="btn btn-outline btn-sm" style="width: 100%;">
+                                View Details & Matches
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="card" style="text-align: center; padding: 40px; margin-bottom: 50px;">
+                <p>No lost items reported yet. Be the first to report!</p>
+                <a href="{{ url_for('report_lost') }}" class="btn btn-primary btn-sm" style="margin-top: 12px;">Report Lost Item</a>
+            </div>
+        {% endif %}
+
+        <!-- Recently Found Items -->
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px;">
+            <div>
+                <h3 style="font-size: 1.5rem; color: var(--primary-navy);">Recently Found Items</h3>
+                <p style="font-size: 14px;">Recognize something you misplaced? Submit a verified ownership claim.</p>
+            </div>
+            <a href="{{ url_for('browse_items', type='found') }}" class="btn btn-outline btn-sm">
+                View All Found <i data-lucide="arrow-right" style="width: 14px; height: 14px;"></i>
+            </a>
+        </div>
+
+        {% if featured_found %}
+            <div class="items-grid">
+                {% for item in featured_found %}
+                    <div class="item-card">
+                        <div class="item-card-image">
+                            {% if item.photo_filename %}
+                                <img src="{{ url_for('static', filename='uploads/' + item.photo_filename) }}" alt="{{ item.name }}">
+                            {% else %}
+                                <div style="color: var(--text-muted); display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                                    <i data-lucide="image" style="width: 32px; height: 32px;"></i>
+                                    <span style="font-size: 12px;">No Photo Uploaded</span>
+                                </div>
+                            {% endif %}
+                            <span class="item-badge-type badge-found">Found</span>
+                            <span class="item-badge-status">{{ item.status|capitalize }}</span>
+                        </div>
+                        <div class="item-card-body">
+                            <div class="item-category-tag">
+                                <i data-lucide="tag" style="width: 13px; height: 13px;"></i>
+                                <span>{{ item.category }}</span>
+                            </div>
+                            <h4 class="item-card-title">{{ item.name }}</h4>
+                            <p class="item-card-desc">{{ item.description }}</p>
+                            <div class="item-meta">
+                                <div class="item-meta-row">
+                                    <i data-lucide="map-pin" style="width: 14px; height: 14px;"></i>
+                                    <span>{{ item.location }}</span>
+                                </div>
+                                <div class="item-meta-row">
+                                    <i data-lucide="calendar" style="width: 14px; height: 14px;"></i>
+                                    <span>{{ item.date_event }}</span>
+                                </div>
+                            </div>
+                            <a href="{{ url_for('item_details', item_id=item.id) }}" class="btn btn-outline btn-sm" style="width: 100%;">
+                                View Details & Claim
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="card" style="text-align: center; padding: 40px;">
+                <p>No found items reported yet. Did you pick up someone's item?</p>
+                <a href="{{ url_for('report_found') }}" class="btn btn-navy btn-sm" style="margin-top: 12px;">Report Found Item</a>
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Why Choose SmartRecover Section -->
+<section id="about" style="padding: 70px 0; background: #fff; border-top: 1px solid var(--border-color);">
+    <div class="container">
+        <div class="section-header">
+            <div class="section-tag">Key Architectural Pillars</div>
+            <h2 class="section-title">Why Choose SmartRecover</h2>
+            <p class="section-desc">Designed specifically for multi-college networks with complete institutional boundary isolation.</p>
+        </div>
+
+        <div class="features-grid">
+            <div class="feature-box">
+                <div class="feature-icon-wrapper">
+                    <i data-lucide="sliders" style="width: 24px; height: 24px;"></i>
+                </div>
+                <h3>Intelligent Weighted Matching</h3>
+                <p>Combines title sequence analysis (30%), category taxonomy (20%), descriptive semantics (25%), location tokens (15%), and chronological proximity (10%).</p>
+            </div>
+
+            <div class="feature-box">
+                <div class="feature-icon-wrapper" style="background: var(--status-success-bg); color: var(--status-success);">
+                    <i data-lucide="lock" style="width: 24px; height: 24px;"></i>
+                </div>
+                <h3>Secure Ownership Verification</h3>
+                <p>Private serial numbers, wallpapers, and identifiable marks are protected from the public. Only reviewers examine claim proof.</p>
+            </div>
+
+            <div class="feature-box">
+                <div class="feature-icon-wrapper" style="background: #F3E8FF; color: #7E22CE;">
+                    <i data-lucide="network" style="width: 24px; height: 24px;"></i>
+                </div>
+                <h3>Multi-Institution Boundaries</h3>
+                <p>Strict logical partitioning ensures student items, matches, and administration stay cleanly segregated within each college.</p>
+            </div>
+
+            <div class="feature-box">
+                <div class="feature-icon-wrapper" style="background: #FEF3C7; color: #B45309;">
+                    <i data-lucide="milestone" style="width: 24px; height: 24px;"></i>
+                </div>
+                <h3>End-to-End Status Tracking</h3>
+                <p>Interactive lifecycle timeline guides each report from initial post through smart match, claim review, and physical handover.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Callout Banner -->
+<section style="padding: 60px 0; background: linear-gradient(135deg, var(--primary-navy) 0%, #1E3A5F 100%); color: #fff;">
+    <div class="container" style="text-align: center; max-width: 700px;">
+        <h2 style="color: #fff; font-size: 2.2rem; margin-bottom: 16px;">Ready to Recover What You Lost?</h2>
+        <p style="color: #CBD5E1; font-size: 16px; margin-bottom: 28px;">
+            Join your college community on SmartRecover and turn accidental losses into swift, joyful reunions.
+        </p>
+        <div style="display: flex; justify-content: center; gap: 14px; flex-wrap: wrap;">
+            <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg">Create Free Account</a>
+            <a href="{{ url_for('browse_items') }}" class="btn btn-outline btn-lg" style="color: #fff; border-color: rgba(255,255,255,0.3); background: transparent;">
+                Browse Campus Directory
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}

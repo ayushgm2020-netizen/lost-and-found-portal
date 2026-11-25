@@ -1,0 +1,289 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard – SmartRecover{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div style="padding: 0 14px 18px; border-bottom: 1px solid var(--border-color); margin-bottom: 14px;">
+            <div style="font-weight: 700; color: var(--primary-navy); font-size: 15px;">{{ current_user.full_name }}</div>
+            <div style="font-size: 12.5px; color: var(--text-muted); display: flex; align-items: center; gap: 4px; margin-top: 2px;">
+                <i data-lucide="building" style="width: 12px; height: 12px;"></i>
+                <span>{{ institution.code }} • {{ current_user.role|capitalize }}</span>
+            </div>
+        </div>
+
+        <ul class="sidebar-menu">
+            <li class="sidebar-header">Main Menu</li>
+            <li>
+                <a href="{{ url_for('dashboard') }}" class="sidebar-link active">
+                    <i data-lucide="layout-dashboard" style="width: 18px; height: 18px;"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('report_lost') }}" class="sidebar-link">
+                    <i data-lucide="search" style="width: 18px; height: 18px;"></i>
+                    <span>Report Lost Item</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('report_found') }}" class="sidebar-link">
+                    <i data-lucide="package-plus" style="width: 18px; height: 18px;"></i>
+                    <span>Report Found Item</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('browse_items') }}" class="sidebar-link">
+                    <i data-lucide="compass" style="width: 18px; height: 18px;"></i>
+                    <span>Browse Items</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('matches') }}" class="sidebar-link">
+                    <i data-lucide="sparkles" style="width: 18px; height: 18px; color: var(--royal-blue);"></i>
+                    <span>Smart Matches</span>
+                    {% if match_count > 0 %}
+                        <span class="sidebar-badge">{{ match_count }}</span>
+                    {% endif %}
+                </a>
+            </li>
+
+            <li class="sidebar-header">Activity & Claims</li>
+            <li>
+                <a href="{{ url_for('claims') }}" class="sidebar-link">
+                    <i data-lucide="shield-check" style="width: 18px; height: 18px;"></i>
+                    <span>My Claims & Reviews</span>
+                    {% if pending_claims_count > 0 %}
+                        <span class="sidebar-badge" style="background: var(--status-warning);">{{ pending_claims_count }}</span>
+                    {% endif %}
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('notifications') }}" class="sidebar-link">
+                    <i data-lucide="bell" style="width: 18px; height: 18px;"></i>
+                    <span>Notifications</span>
+                    {% if unread_notifications_count > 0 %}
+                        <span class="sidebar-badge" style="background: var(--status-danger);">{{ unread_notifications_count }}</span>
+                    {% endif %}
+                </a>
+            </li>
+
+            <li class="sidebar-header">Account</li>
+            <li>
+                <a href="{{ url_for('profile') }}" class="sidebar-link">
+                    <i data-lucide="user" style="width: 18px; height: 18px;"></i>
+                    <span>Profile Settings</span>
+                </a>
+            </li>
+            {% if current_user.role == 'admin' %}
+            <li>
+                <a href="{{ url_for('admin_dashboard') }}" class="sidebar-link" style="color: #7E22CE; background: #FAF5FF;">
+                    <i data-lucide="shield-alert" style="width: 18px; height: 18px;"></i>
+                    <span>Admin Portal</span>
+                </a>
+            </li>
+            {% endif %}
+            <li>
+                <a href="{{ url_for('logout') }}" class="sidebar-link" style="color: var(--status-danger);">
+                    <i data-lucide="log-out" style="width: 18px; height: 18px;"></i>
+                    <span>Sign Out</span>
+                </a>
+            </li>
+        </ul>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="dashboard-main">
+        <!-- Top Bar Banner -->
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; flex-wrap: wrap; gap: 16px;">
+            <div>
+                <h1 style="font-size: 1.85rem; color: var(--primary-navy);">Campus Dashboard</h1>
+                <p style="font-size: 14px; color: var(--text-secondary);">
+                    Welcome back, {{ current_user.full_name }} • {{ institution.name }}
+                </p>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <a href="{{ url_for('report_lost') }}" class="btn btn-primary btn-sm">
+                    <i data-lucide="plus" style="width: 16px; height: 16px;"></i> Report Lost Item
+                </a>
+                <a href="{{ url_for('report_found') }}" class="btn btn-navy btn-sm">
+                    <i data-lucide="plus" style="width: 16px; height: 16px;"></i> Report Found Item
+                </a>
+            </div>
+        </div>
+
+        <!-- Metric Stat Cards -->
+        <div class="stats-grid" style="margin-top: 0; margin-bottom: 30px;">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: #FEE2E2; color: #991B1B;">
+                    <i data-lucide="search" style="width: 22px; height: 22px;"></i>
+                </div>
+                <div>
+                    <div class="stat-number">{{ user_stats.lost_count }}</div>
+                    <div class="stat-label">My Lost Reports</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon" style="background: #DCFCE7; color: #166534;">
+                    <i data-lucide="package-check" style="width: 22px; height: 22px;"></i>
+                </div>
+                <div>
+                    <div class="stat-number">{{ user_stats.found_count }}</div>
+                    <div class="stat-label">My Found Reports</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon" style="background: #EFF6FF; color: var(--royal-blue);">
+                    <i data-lucide="sparkles" style="width: 22px; height: 22px;"></i>
+                </div>
+                <div>
+                    <div class="stat-number">{{ match_count }}</div>
+                    <div class="stat-label">Possible Matches</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon" style="background: #FEF3C7; color: #92400E;">
+                    <i data-lucide="shield-alert" style="width: 22px; height: 22px;"></i>
+                </div>
+                <div>
+                    <div class="stat-number">{{ user_stats.pending_claims }}</div>
+                    <div class="stat-label">Pending Claims</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon" style="background: #DCFCE7; color: #15803D;">
+                    <i data-lucide="check-check" style="width: 22px; height: 22px;"></i>
+                </div>
+                <div>
+                    <div class="stat-number">{{ user_stats.recovered_count }}</div>
+                    <div class="stat-label">Recovered Items</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Latest Possible Smart Matches Section -->
+        <div class="card" style="margin-bottom: 30px;">
+            <div class="card-header">
+                <div>
+                    <h3 class="card-title" style="display: flex; align-items: center; gap: 8px;">
+                        <i data-lucide="sparkles" style="width: 18px; height: 18px; color: var(--royal-blue);"></i>
+                        <span>Latest Smart Matches for Your Reports</span>
+                    </h3>
+                    <p style="font-size: 13px; margin-top: 2px;">Calculated using our 5-factor similarity engine.</p>
+                </div>
+                <a href="{{ url_for('matches') }}" class="btn btn-outline btn-sm">
+                    View All Matches <i data-lucide="arrow-right" style="width: 14px; height: 14px;"></i>
+                </a>
+            </div>
+
+            {% if top_matches %}
+                <div style="display: flex; flex-direction: column; gap: 14px;">
+                    {% for m in top_matches %}
+                        <div style="border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 16px; display: flex; align-items: center; justify-content: space-between; gap: 16px; background: #fff; flex-wrap: wrap;">
+                            <div style="display: flex; align-items: center; gap: 16px;">
+                                <div class="score-circle" style="width: 52px; height: 52px; font-size: 15px;">
+                                    {{ m.score|round(0)|int }}%
+                                    <span style="font-size: 8px;">Match</span>
+                                </div>
+                                <div>
+                                    <div style="font-weight: 700; color: var(--primary-navy); font-size: 15px;">
+                                        {{ m.lost_item_name }} <span style="color: var(--text-muted); font-weight: normal;">⟷</span> {{ m.found_item_name }}
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--text-secondary); margin-top: 2px;">
+                                        Category: {{ m.category }} • {{ m.badge_label }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 8px;">
+                                <a href="{{ url_for('item_details', item_id=m.found_item_id) }}" class="btn btn-outline btn-sm">
+                                    View Found Item
+                                </a>
+                                <a href="{{ url_for('matches') }}" class="btn btn-primary btn-sm">
+                                    Inspect Factors
+                                </a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div style="text-align: center; padding: 30px; color: var(--text-secondary);">
+                    <i data-lucide="shield-check" style="width: 36px; height: 36px; color: var(--royal-blue); margin-bottom: 8px;"></i>
+                    <p>No active smart matches found right now. When complementary lost or found items are posted, they will appear here automatically.</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- User's Recent Reports -->
+        <div class="card">
+            <div class="card-header">
+                <div>
+                    <h3 class="card-title">My Recent Reports</h3>
+                    <p style="font-size: 13px; margin-top: 2px;">Items you have reported lost or found at {{ institution.name }}.</p>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <a href="{{ url_for('report_lost') }}" class="btn btn-outline btn-sm">+ New Lost</a>
+                    <a href="{{ url_for('report_found') }}" class="btn btn-outline btn-sm">+ New Found</a>
+                </div>
+            </div>
+
+            {% if user_items %}
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px;">
+                        <thead>
+                            <tr style="border-bottom: 2px solid var(--border-color); color: var(--text-secondary);">
+                                <th style="padding: 12px 14px;">Type</th>
+                                <th style="padding: 12px 14px;">Item Name</th>
+                                <th style="padding: 12px 14px;">Category</th>
+                                <th style="padding: 12px 14px;">Date</th>
+                                <th style="padding: 12px 14px;">Location</th>
+                                <th style="padding: 12px 14px;">Status</th>
+                                <th style="padding: 12px 14px; text-align: right;">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in user_items %}
+                                <tr style="border-bottom: 1px solid var(--border-color); transition: var(--transition);">
+                                    <td style="padding: 12px 14px;">
+                                        {% if item.type == 'lost' %}
+                                            <span class="item-badge-type badge-lost" style="position: static; padding: 2px 8px;">Lost</span>
+                                        {% else %}
+                                            <span class="item-badge-type badge-found" style="position: static; padding: 2px 8px;">Found</span>
+                                        {% endif %}
+                                    </td>
+                                    <td style="padding: 12px 14px; font-weight: 600; color: var(--primary-navy);">
+                                        {{ item.name }}
+                                    </td>
+                                    <td style="padding: 12px 14px; color: var(--text-secondary);">{{ item.category }}</td>
+                                    <td style="padding: 12px 14px; color: var(--text-secondary);">{{ item.date_event }}</td>
+                                    <td style="padding: 12px 14px; color: var(--text-secondary);">{{ item.location }}</td>
+                                    <td style="padding: 12px 14px;">
+                                        <span style="font-size: 12px; font-weight: 600; padding: 3px 8px; border-radius: 9999px; background: var(--bg-subtle);">
+                                            {{ item.status|replace('_', ' ')|capitalize }}
+                                        </span>
+                                    </td>
+                                    <td style="padding: 12px 14px; text-align: right;">
+                                        <a href="{{ url_for('item_details', item_id=item.id) }}" class="btn btn-outline btn-sm">
+                                            Details
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div style="text-align: center; padding: 40px;">
+                    <p style="margin-bottom: 14px;">You haven't submitted any reports yet.</p>
+                    <a href="{{ url_for('report_lost') }}" class="btn btn-primary btn-sm">Report Your First Item</a>
+                </div>
+            {% endif %}
+        </div>
+    </main>
+</div>
+{% endblock %}
